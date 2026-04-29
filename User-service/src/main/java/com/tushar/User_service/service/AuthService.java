@@ -1,6 +1,7 @@
 package com.tushar.User_service.service;
 
 import com.tushar.User_service.dto.AuthResponse;
+import com.tushar.User_service.dto.LoginRequest;
 import com.tushar.User_service.dto.UserDTO;
 import com.tushar.User_service.mapper.UserMapper;
 import com.tushar.User_service.model.User;
@@ -9,6 +10,7 @@ import com.tushar.User_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ public class AuthService {
     private  final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
     private final JWTProvider jwtProvider;
+    private final CustomUserDetailService userDetailService;
 
     /*
     1. check if the email already exists or not
@@ -29,7 +32,7 @@ public class AuthService {
     4.Generate the JWT Token
     5.Return token and user information
      */
-    AuthResponse signp(UserDTO request) throws  Exception{
+    public AuthResponse signp(UserDTO request) throws  Exception{
         User existingUser=userRepository.findByEmail(request.getEmail());
         if(existingUser!=null){
             throw new Exception("User already exists");
@@ -66,12 +69,37 @@ public class AuthService {
     /*
     1.load user by email
     2.compare password with BCrypt
-    3.update lastlogin
+    3.update last login
     4.Generate JWT Token
     5.Return token and user information
      */
-    AuthResponse login(String email,String password){
+    public AuthResponse login(LoginRequest request) throws Exception{
+         String email=request.getEmail();
+         String password=request.getPassword();
+        Authentication authentication =authenticate(email,password);
 
+        User user=userRepository.findByEmail(email);
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+        String jwt=jwtProvider.generateToken(authentication,user.getId());
+        AuthResponse response=new AuthResponse();
+        response.setJwt(jwt);
+        response.setTitle("Login! ");
+        response.setUser(UserMapper.toDTO(user));
+        response.setMessage("login SuccessFully");
+        return  response;
+    }
+
+    private Authentication authenticate(String email,String password) throws Exception {
+        UserDetails userDetails =userDetailService.loadUserByUsername(email);
+
+        if(!encoder.matches(password,userDetails.getPassword())){
+            throw new Exception("invalid password or username");
+        }
+
+        return new UsernamePasswordAuthenticationToken(userDetails,
+                null ,
+                userDetails.getAuthorities());
     }
 
 
