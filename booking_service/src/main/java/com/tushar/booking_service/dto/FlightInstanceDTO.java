@@ -1,20 +1,20 @@
-package com.tushar.pricing_service.dto;
+package com.tushar.booking_service.dto;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class PriceRequest {
-    private Integer flightInstanceId;
-    private BigDecimal basePrice;
+public class FlightInstanceDTO {
+    private Integer id;
+    private String flightNumber;
     private LocalDateTime departureDateTime;
-    private String currency;
+    private LocalDateTime arrivalDateTime;
 }

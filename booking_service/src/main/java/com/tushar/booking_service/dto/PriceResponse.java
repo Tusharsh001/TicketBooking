@@ -1,4 +1,4 @@
-package com.tushar.pricing_service.dto;
+package com.tushar.booking_service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,15 +6,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class PriceRequest {
+public class PriceResponse {
     private Integer flightInstanceId;
-    private BigDecimal basePrice;
-    private LocalDateTime departureDateTime;
+    private String cabinClass;
+    private BigDecimal price;
     private String currency;
+    private Boolean isLastDayPrice;
 }
